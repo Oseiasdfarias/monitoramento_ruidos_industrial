@@ -36,7 +36,7 @@ pico_sdk_init()
 # Add executable. Default name is the project name, version 0.1
 
 add_executable(monitoramento_ruido monitoramento_ruido.c
-               inc/ssd1306_i2c.c mic.c
+               inc/ssd1306_i2c.c inc/mic.c
             )
 
 pico_set_program_name(monitoramento_ruido "monitoramento_ruido")

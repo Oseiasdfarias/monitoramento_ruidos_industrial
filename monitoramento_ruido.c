@@ -8,7 +8,7 @@
 #include "pico/binary_info.h"
 #include "inc/ssd1306.h"
 #include "hardware/i2c.h"
-#include "mic.h"
+#include "inc/mic.h"
 
 const uint I2C_SDA = 14;
 const uint I2C_SCL = 15;
@@ -118,20 +118,20 @@ restart:
 
     while (true)
     {
-        printf("Hello, world!\n");
 
         // Realiza uma amostragem do microfone.
         sample_mic();
         // Pega a potência média da amostragem do microfone.
-        float avg = mic_power();
-        avg = 2.f * abs(ADC_ADJUST(avg)); // Ajusta para intervalo de 0 a 3.3V. (apenas magnitude, sem sinal)
+        float avg_rms = mic_power();
+        avg_rms = 2.f * abs(ADC_ADJUST(avg_rms)); // Ajusta para intervalo de 0 a 3.3V. (apenas magnitude, sem sinal)
+        float db = rms_to_db(avg_rms);
 
         // float intensity = get_intensity(avg); // Calcula intensidade a ser mostrada na matriz de LEDs.
 
         char nivel_avg[50];
 
         // Formata a string com o valor de db
-        sprintf(nivel_avg, "Nivel dB: %.2f dB", avg);
+        sprintf(nivel_avg, "Nivel dB: %.2f dB", db);
 
         char *text[] = {
             "      ",
@@ -147,7 +147,7 @@ restart:
         }
         render_on_display(ssd, &frame_area);
 
-        printf("Nível de dB: %.2f\n", avg); // Exibe o valor em dB
+        printf("Nível de dB: %.2f\n", db); // Exibe o valor em dB
 
         sleep_ms(1000);
     }
