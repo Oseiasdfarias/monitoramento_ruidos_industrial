@@ -13,6 +13,19 @@
 const uint I2C_SDA = 14;
 const uint I2C_SCL = 15;
 
+void init_ssd1306()
+{
+    // Inicialização do i2c
+    i2c_init(i2c1, ssd1306_i2c_clock * 1000);
+    gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);
+    gpio_set_function(I2C_SCL, GPIO_FUNC_I2C);
+    gpio_pull_up(I2C_SDA);
+    gpio_pull_up(I2C_SCL);
+
+    // Processo de inicialização completo do OLED SSD1306
+    ssd1306_init();
+}
+
 int main()
 {
     stdio_init_all();
@@ -68,15 +81,10 @@ int main()
 
     // ###################################################################################
 
-    // Inicialização do i2c
-    i2c_init(i2c1, ssd1306_i2c_clock * 1000);
-    gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);
-    gpio_set_function(I2C_SCL, GPIO_FUNC_I2C);
-    gpio_pull_up(I2C_SDA);
-    gpio_pull_up(I2C_SCL);
+    // Parte do código para exibir a mensagem no display (opcional: mudar ssd1306_height para 32 em ssd1306_i2c.h)
+    // /**
 
-    // Processo de inicialização completo do OLED SSD1306
-    ssd1306_init();
+    init_ssd1306();
 
     // Preparar área de renderização para o display (ssd1306_width pixels por ssd1306_n_pages páginas)
     struct render_area frame_area = {
@@ -95,11 +103,10 @@ int main()
 
 restart:
 
-    // Parte do código para exibir a mensagem no display (opcional: mudar ssd1306_height para 32 em ssd1306_i2c.h)
-    // /**
     char *text[] = {
         "      ",
-        "  Bem-vindos!   ",
+        "      ",
+        "  Monitor de Ruido!   ",
         "  Embarcatech   "};
 
     int y = 0;
@@ -123,15 +130,14 @@ restart:
         sample_mic();
         // Pega a potência média da amostragem do microfone.
         float avg_rms = mic_power();
-        avg_rms = 2.f * abs(ADC_ADJUST(avg_rms)); // Ajusta para intervalo de 0 a 3.3V. (apenas magnitude, sem sinal)
+        // Ajusta para intervalo de 0 a 3.3V. (apenas magnitude, sem sinal)
+        avg_rms = 2.f * abs(ADC_ADJUST(avg_rms));
         float db = rms_to_db(avg_rms);
-
-        // float intensity = get_intensity(avg); // Calcula intensidade a ser mostrada na matriz de LEDs.
 
         char nivel_avg[50];
 
         // Formata a string com o valor de db
-        sprintf(nivel_avg, "Nivel dB: %.2f dB", db);
+        sprintf(nivel_avg, "Nivel dB: %.2fdB", db);
 
         char *text[] = {
             "      ",
