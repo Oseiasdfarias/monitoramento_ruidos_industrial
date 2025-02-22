@@ -40,6 +40,8 @@
     "*.yaml": "yaml",
     "binary_info.h": "c",
     "i2c.h": "c",
-    "ssd1306.h": "c"
+    "ssd1306.h": "c",
+    "stdlib.h": "c",
+    "ctype.h": "c"
   }
 }

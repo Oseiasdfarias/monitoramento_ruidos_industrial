@@ -9,12 +9,22 @@
 #include "inc/ssd1306.h"
 #include "hardware/i2c.h"
 #include "inc/mic.h"
+#include "inc/pwm_buzzer.h"
 
+// Pinos para comunicação I2C para o display OLED
 const uint I2C_SDA = 14;
 const uint I2C_SCL = 15;
 
+// Define os pinos dos buzzer
+#define BUZZER_1_PIN 10
+#define BUZZER_2_PIN 21
+
+// Frequência
+#define FREQ_AGUDO 400
+
 void init_ssd1306()
 {
+
     // Inicialização do i2c
     i2c_init(i2c1, ssd1306_i2c_clock * 1000);
     gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);
@@ -49,28 +59,21 @@ int main()
         false, // Não usar bit de erro
         false  // Não fazer downscale das amostras para 8-bits, manter 12-bits.
     );
-
     adc_set_clkdiv(ADC_CLOCK_DIV);
 
     printf("ADC Configurado!\n\n");
-
     printf("Preparando DMA...");
 
     // Tomando posse de canal do DMA.
     dma_channel = dma_claim_unused_channel(true);
-
     // Configurações do DMA.
     dma_cfg = dma_channel_get_default_config(dma_channel);
-
     // Tamanho da transferência é 16-bits (usamos uint16_t para armazenar valores do ADC)
     channel_config_set_transfer_data_size(&dma_cfg, DMA_SIZE_16);
-
     // Desabilita incremento do ponteiro de leitura (lemos de um único registrador)
     channel_config_set_read_increment(&dma_cfg, false);
-
     // Habilita incremento do ponteiro de escrita (escrevemos em um array/buffer)
     channel_config_set_write_increment(&dma_cfg, true);
-
     channel_config_set_dreq(&dma_cfg, DREQ_ADC); // Usamos a requisição de dados do ADC
 
     // Amostragem de teste.
@@ -85,6 +88,8 @@ int main()
     // /**
 
     init_ssd1306();
+
+    pwm_init_buzzer(BUZZER_2_PIN);
 
     // Preparar área de renderização para o display (ssd1306_width pixels por ssd1306_n_pages páginas)
     struct render_area frame_area = {
@@ -107,6 +112,7 @@ restart:
         "      ",
         "      ",
         "  Monitor de Ruido!   ",
+        "      ",
         "  Embarcatech   "};
 
     int y = 0;
@@ -116,7 +122,6 @@ restart:
         y += 8;
     }
     render_on_display(ssd, &frame_area);
-
     sleep_ms(3000);
 
     // zera o display inteiro
@@ -125,7 +130,6 @@ restart:
 
     while (true)
     {
-
         // Realiza uma amostragem do microfone.
         sample_mic();
         // Pega a potência média da amostragem do microfone.
@@ -135,12 +139,24 @@ restart:
         float db = rms_to_db(avg_rms);
 
         char nivel_avg[50];
+        char *msg_db;
 
+        if (db > 85)
+        {
+            msg_db = "Use Protetor Auricular!!!";
+            play_tone(BUZZER_2_PIN, FREQ_AGUDO, 1000);
+        }
+        else
+        {
+            msg_db = "Anbiente Seguro!";
+        }
         // Formata a string com o valor de db
-        sprintf(nivel_avg, "Nivel dB: %.2fdB", db);
+        sprintf(nivel_avg, "Nivel dB:%.2fdB", db);
 
         char *text[] = {
             "      ",
+            "      ",
+            msg_db,
             "      ",
             nivel_avg,
         };
@@ -152,10 +168,8 @@ restart:
             y += 8;
         }
         render_on_display(ssd, &frame_area);
-
         printf("Nível de dB: %.2f\n", db); // Exibe o valor em dB
-
-        sleep_ms(1000);
+        sleep_ms(500);
     }
     return 0;
 }

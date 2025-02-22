@@ -36,7 +36,7 @@ pico_sdk_init()
 # Add executable. Default name is the project name, version 0.1
 
 add_executable(monitoramento_ruido monitoramento_ruido.c
-               inc/ssd1306_i2c.c inc/mic.c
+               inc/ssd1306_i2c.c inc/mic.c inc/pwm_buzzer.c
             )
 
 pico_set_program_name(monitoramento_ruido "monitoramento_ruido")
@@ -60,6 +60,7 @@ target_link_libraries(monitoramento_ruido
         hardware_i2c
         hardware_adc
         hardware_dma
+        hardware_pwm
     )
 
 pico_add_extra_outputs(monitoramento_ruido)

@@ -70,6 +70,7 @@ float mic_power()
  */
 float rms_to_db(float rms_value)
 {
-    float v_ref = 0.00002f; // Tensão de referência de 1.0 Volt.
+    // float v_ref = 0.00002f; // Tensão de referência de 1.0 Volt.
+    float v_ref = 0.0001f; // Tensão de referência de 1.0 Volt.
     return 20.0f * log10f(rms_value / v_ref);
 }
