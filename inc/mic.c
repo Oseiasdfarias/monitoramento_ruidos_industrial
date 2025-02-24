@@ -6,7 +6,7 @@
 
 // Pino e canal do microfone no ADC.
 #define MIC_CHANNEL 2
-#define MIC_PIN (26 + MIC_CHANNEL)
+#define MIC_PIN (28)
 
 // Parâmetros e macros do ADC.
 #define ADC_CLOCK_DIV 96.f
