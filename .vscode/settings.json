@@ -42,6 +42,9 @@
     "i2c.h": "c",
     "ssd1306.h": "c",
     "stdlib.h": "c",
-    "ctype.h": "c"
+    "ctype.h": "c",
+    "led_matrix.h": "c",
+    "pwm_buzzer.h": "c",
+    "mic.h": "c"
   }
 }
